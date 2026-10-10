@@ -1,121 +1,125 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+function TodoItem({ todo, onToggle, onUpdate, onDelete }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editText, setEditText] = useState(todo.text)
+
+  const handleEdit = () => {
+    setEditText(todo.text)
+    setIsEditing(true)
+  }
+
+  const handleSave = (e) => {
+    e.preventDefault()
+    const text = editText.trim()
+    if (!text) return
+    onUpdate(todo.id, text)
+    setIsEditing(false)
+  }
+
+  const handleDelete = () => {
+    if (window.confirm('本当によろしいですか？')) {
+      onDelete(todo.id)
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <li className="todo-item">
+      <input
+        type="checkbox"
+        checked={todo.completed}
+        onChange={() => onToggle(todo.id)}
+      />
+      {isEditing ? (
+        <form className="edit-form" onSubmit={handleSave}>
+          <input
+            type="text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            autoFocus
+          />
+          <button type="submit">保存</button>
+        </form>
+      ) : (
+        <>
+          <span className={todo.completed ? 'todo-text completed' : 'todo-text'}>
+            {todo.text}
+          </span>
+          <button type="button" onClick={handleEdit}>
+            編集
+          </button>
+        </>
+      )}
+      <button type="button" onClick={handleDelete}>
+        削除
+      </button>
+    </li>
+  )
+}
 
-      <div className="ticks"></div>
+function App() {
+  const [todos, setTodos] = useState([])
+  const [input, setInput] = useState('')
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+  const completedCount = todos.filter((todo) => todo.completed).length
+  const incompleteCount = todos.length - completedCount
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+  const handleAdd = (e) => {
+    e.preventDefault()
+    const text = input.trim()
+    if (!text) return
+    setTodos([...todos, { id: crypto.randomUUID(), text, completed: false }])
+    setInput('')
+  }
+
+  const handleToggle = (id) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      ),
+    )
+  }
+
+  const handleUpdate = (id, text) => {
+    setTodos(todos.map((todo) => (todo.id === id ? { ...todo, text } : todo)))
+  }
+
+  const handleDelete = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id))
+  }
+
+  return (
+    <main className="app">
+      <h1>ToDo List</h1>
+
+      <form className="add-form" onSubmit={handleAdd}>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="タスクを入力"
+        />
+        <button type="submit">保存</button>
+      </form>
+
+      <p className="counts">
+        全てのタスク：{todos.length} 完了済み：{completedCount} 未完了：
+        {incompleteCount}
+      </p>
+
+      <ul className="todo-list">
+        {todos.map((todo) => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={handleToggle}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+          />
+        ))}
+      </ul>
+    </main>
   )
 }
 
