@@ -12,6 +12,14 @@
 
 .edit-form {
   flex: 1;
+  flex-wrap: wrap;
+}
+
+.error-message {
+  flex-basis: 100%;
+  margin: 0;
+  color: #d32f2f;
+  font-size: 0.85rem;
 }
 
 input[type='text'] {

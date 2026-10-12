@@ -3,16 +3,21 @@ import { useState } from 'react'
 export function TodoItem({ todo, onToggle, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editText, setEditText] = useState('')
+  const [error, setError] = useState('')
 
   const handleEdit = () => {
     setEditText(todo.text)
+    setError('')
     setIsEditing(true)
   }
 
   const handleSave = (e) => {
     e.preventDefault()
     const text = editText.trim()
-    if (!text) return
+    if (!text) {
+      setError('文字を入力してください')
+      return
+    }
     onUpdate(todo.id, text)
     setIsEditing(false)
   }
@@ -35,10 +40,14 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }) {
           <input
             type="text"
             value={editText}
-            onChange={(e) => setEditText(e.target.value)}
+            onChange={(e) => {
+              setEditText(e.target.value)
+              setError('')
+            }}
             autoFocus
           />
           <button type="submit">保存</button>
+          {error && <p className="error-message">{error}</p>}
         </form>
       ) : (
         <>
