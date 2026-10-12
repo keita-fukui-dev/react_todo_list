@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 export function TodoItem({ todo, onToggle, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editText, setEditText] = useState(todo.text)
+  const [editText, setEditText] = useState('')
 
   const handleEdit = () => {
     setEditText(todo.text)
